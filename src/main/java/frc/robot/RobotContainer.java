@@ -8,7 +8,8 @@ import frc.robot.Constants.*;
 import frc.robot.commands.*;
 import frc.robot.commands.ElevatorCommand.ElevatorPresets;
 
-import com.kauailabs.navx.frc.AHRS;
+import com.studica.frc.AHRS;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
