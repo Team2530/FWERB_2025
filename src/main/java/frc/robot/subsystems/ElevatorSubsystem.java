@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -43,10 +42,9 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
             Constants.Elevator.Feedforward.Ka
 
     );
-    
+
     private final SparkMaxConfig elevatorConfigOne = new SparkMaxConfig();
     private final SparkMaxConfig elevatorConfigTwo = new SparkMaxConfig();
-
 
     /*
      * DCMotor gearbox,
@@ -76,7 +74,7 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
             0.001,
             0.001
     );
-    
+
     private DoubleLogEntry elevatorTargetP = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/target/position");
     private DoubleLogEntry elevatorTargetV = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/target/velocity");
     private DoubleLogEntry elevatorP = new DoubleLogEntry(DataLogManager.getLog(), "Elevator/state/position");
