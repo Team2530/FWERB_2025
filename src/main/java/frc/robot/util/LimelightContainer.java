@@ -14,19 +14,42 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.Limelight;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LimelightContainer {
+  static int SIMCOUNTER = 0;
+  static int RLCOUNTER = 0;
   private static ArrayList<Limelight> limelights = new ArrayList<Limelight>();
 
   public LimelightContainer(Limelight... limelights) {
     for (Limelight limelight : limelights) {
       LimelightContainer.limelights.add(limelight);
     }
+    enableLimelights(true);
+    SmartDashboard.putString("Limelights added and enabled", "true");
   }
 
   public void enableLimelights(boolean enable) {
     for (Limelight limelight : limelights) {
       limelight.setEnabled(enable);
+    }
+  }
+  public static void estimateSimOdometry(){
+    SmartDashboard.putString("Estimating sim", "yes");
+    for (Limelight limelight : limelights) {
+      boolean doRejectUpdate = false;
+      LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
+      if(mt2==null){ // in case not all limelights are connected
+        continue;
+      }
+      SmartDashboard.putString("Not null: ", limelight.toString() + " " + limelight.getName() + " \n"+ mt2.toString());
+      if (mt2.tagCount == 0) {
+        doRejectUpdate = true;
+      }
+      if (!doRejectUpdate) {
+        SmartDashboard.putString("Simulated Pos", mt2.pose.toString()+SIMCOUNTER);
+        SIMCOUNTER++;
+      }
     }
   }
 
@@ -36,6 +59,9 @@ public class LimelightContainer {
       LimelightHelpers.SetRobotOrientation(limelight.getName(),
           poseEstimator.getEstimatedPosition().getRotation().getDegrees(), navx.getRate(), 0, 0, 0, 0);
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
+      if(mt2==null){
+        continue;
+      }
       if (Math.abs(navx.getRate()) > 720) {
         doRejectUpdate = true;
       }
@@ -48,6 +74,8 @@ public class LimelightContainer {
             mt2.pose,
             mt2.timestampSeconds);
       }
+      SmartDashboard.putString("Pos", mt2.pose.toString()+" "+ RLCOUNTER);
+      RLCOUNTER++;
     }
   }
 

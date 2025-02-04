@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawFiducial;
+import frc.robot.util.LimelightContainer;
 
 public class Limelight extends SubsystemBase {
     public enum LimelightType {
@@ -14,7 +15,6 @@ public class Limelight extends SubsystemBase {
         LL2Plus(62.5, 48.9),
         LL3(62.5, 48.9),
         LL3G(82, 56.2),
-        // TODO: Currently unknown check with LL4
         LL4(82, 56.2);
 
         private double HFOV;
@@ -52,7 +52,6 @@ public class Limelight extends SubsystemBase {
                 }
             }
         }
-
         SmartDashboard.putNumber(name, numTargets());
     }
 
