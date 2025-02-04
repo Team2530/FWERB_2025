@@ -4,18 +4,18 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
-import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -41,45 +41,14 @@ public final class Constants {
     public static final double robotWidthMeters = Units.inchesToMeters(25.0);
     public static final double robotLengthMeters = Units.inchesToMeters(25.0);
     
-
-
-
-
-
-
-
-
-
-
-
-    // ############### PLACEHOLDERS ###############
-    public static final double TOTAL_MASS_KG = 10;
-    public static final double MOMENT_OF_INERTIA = 1;
-    // ############### PLACEHOLDERS ###############
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      // TODO: ############## REPLACE PLACEHOLDERS ##############
+      public static final double TOTAL_MASS_KG = 49; // 107lbs
+      public static final double MOMENT_OF_INERTIA = 5;
   }
 
   public static final class FieldConstants {
     public static final double GRAVITY = 9.81;
     public static final double SPEAKER_HEIGHT = 2.05; // Meters
-
-    
 
     public static Alliance getAlliance() {
       if (DriverStation.getAlliance().isPresent()) {
@@ -92,9 +61,9 @@ public final class Constants {
 
   public static class SwerveModuleConstants {
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
-    public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d);
+    public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d); // 6.75:1
     // This is for L2 modules with 16T pinions
-    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d) * (16.f / 14.f);
+    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d);
 
     public static final double DRIVE_ROTATION_TO_METER = DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER;
     public static final double STEER_ROTATION_TO_RADIANS = STEERING_GEAR_RATIO * Math.PI * 2d;
@@ -104,7 +73,6 @@ public final class Constants {
     // TODO: ############## REPLACE PLACEHOLDERS ##############
     public static final double WHEEL_FRICTION_COEFFICIENT = 1;
 
-    
     // Actual drive gains
     // public static final double MODULE_KP = 0.5;
     // public static final double MODULE_KD = 0.03;
@@ -154,17 +122,15 @@ public final class Constants {
     public static final double MAX_ROBOT_VELOCITY = 5.21;
     public static final double MAX_ROBOT_RAD_VELOCITY = 12.0; // Approx. Measured rads/sec
 
+    // TODO: ############## REPLACE PLACEHOLDERS ##############
+    public static final double MAX_MODULE_CURRENT = 100;
+
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
     public static final double WHEEL_BASE = Units.inchesToMeters(19.75);
     // TODO: Set this for FWERB V2
     public static final Rotation2d NAVX_ANGLE_OFFSET = Rotation2d.fromDegrees(-90);
     // TODO: I'm not going to touch this... but it seems important!
     public static final double DRIVE_BASE_RADIUS = Units.inchesToMeters(15);
-
-
-    // TODO: ############## REPLACE PLACEHOLDERS ##############
-    public static final double MAX_MODULE_CURRENT = 10;
-
 
     public static final class ModuleIndices {
       public static final int FRONT_LEFT = 0;
@@ -194,8 +160,9 @@ public final class Constants {
     public static boolean elevatorOneInverted = true;
     public static boolean elevatorTwoInverted = false;
 
-public static Type bottomLimitMode = Type.kNormallyOpen;
-    
+    public static Type bottomLimitMode = Type.kNormallyOpen;
+
+
     public static double motorTurnsPerMeter = 39.44;
 
     public static class PID {
@@ -232,15 +199,11 @@ public static Type bottomLimitMode = Type.kNormallyOpen;
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5, 0, 0.2);
     public static final PIDConstants ROTATION_PID = new PIDConstants(5, 0, 0.2);
 
-public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONTROLLER = new PPHolonomicDriveController(
+    public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONTROLLER = new PPHolonomicDriveController(
       TRANSLATION_PID,
       ROTATION_PID
     );
-    public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONFIG = new PPHolonomicDriveController(
-        TRANSLATION_PID,
-        ROTATION_PID
-    );
-  
+
     public static final RobotConfig ROBOT_CONFIG = new RobotConfig(
       RobotConstants.TOTAL_MASS_KG,
       RobotConstants.MOMENT_OF_INERTIA,
@@ -250,8 +213,12 @@ public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONTROLLER = n
         SwerveModuleConstants.WHEEL_FRICTION_COEFFICIENT, // TODO: ############## REPLACE PLACEHOLDERS ##############
         DCMotor.getKrakenX60(1),
         DriveConstants.MAX_MODULE_CURRENT, // TODO: ############## REPLACE PLACEHOLDERS ##############
-        4
-      )
+        1
+      ),
+      new Translation2d(-0.5, 0.5),
+      new Translation2d(0.5, 0.5),
+      new Translation2d(-0.5, -0.5),
+      new Translation2d(0.5, -0.5)
     );
   }
 
