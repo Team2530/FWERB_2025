@@ -42,7 +42,6 @@ public class Limelight extends SubsystemBase {
 
     @Override
     public void periodic() {
-        System.out.println("Code running!");
         if (isEnabled) {
             if (cropEnabled) {
                 if (numTargets() > 0) {

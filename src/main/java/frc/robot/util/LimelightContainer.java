@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class LimelightContainer {
   static int SIMCOUNTER = 0;
   static int RLCOUNTER = 0;
+  static int RLCountermt1 = 0;
   private static ArrayList<Limelight> limelights = new ArrayList<Limelight>();
 
   public LimelightContainer(Limelight... limelights) {
@@ -54,11 +55,22 @@ public class LimelightContainer {
   }
 
   public void estimateMT2Odometry(SwerveDrivePoseEstimator poseEstimator, ChassisSpeeds speeds, AHRS navx) {
+    SmartDashboard.putBoolean("Updating Odometry: ", false);
+
     for (Limelight limelight : limelights) {
       boolean doRejectUpdate = false;
+      boolean doRejectUpdateMT1 = false;
+      
+
       LimelightHelpers.SetRobotOrientation(limelight.getName(),
-          poseEstimator.getEstimatedPosition().getRotation().getDegrees(), navx.getRate(), 0, 0, 0, 0);
+      poseEstimator.getEstimatedPosition().getRotation().getDegrees(), navx.getRate(), 0, 0, 33, 0);
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
+      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
+
+      if(mt1==null || mt1.tagCount == 0){
+        doRejectUpdateMT1 = true;
+      }
+
       if(mt2==null){
         continue;
       }
@@ -69,13 +81,16 @@ public class LimelightContainer {
         doRejectUpdate = true;
       }
       if (!doRejectUpdate) {
+        SmartDashboard.putBoolean("Updating Odometry: ", true);
         poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
         poseEstimator.addVisionMeasurement(
             mt2.pose,
             mt2.timestampSeconds);
-      }
+      } 
       SmartDashboard.putString("Pos", mt2.pose.toString()+" "+ RLCOUNTER);
-      RLCOUNTER++;
+      SmartDashboard.putString("Pos MT1: ", mt1.pose.toString()+" " + RLCountermt1);
+      RLCOUNTER++;  
+      RLCountermt1++;
     }
   }
 

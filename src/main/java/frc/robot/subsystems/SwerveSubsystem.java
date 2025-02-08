@@ -192,7 +192,7 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isTeleopEnabled()) {
             RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
         } else {
-            updateVisionOdometry();
+            //updateVisionOdometry();
         }
 
         odometry.update(getRotation2d(), getModulePositions());
