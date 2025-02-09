@@ -128,7 +128,7 @@ public class LimelightContainer {
     for (Limelight limelight : limelights) {
       boolean doRejectUpdate = false;
 
-      SmartDashboard.putBoolean("Rejected due to too-far pose", doRejectUpdate);
+      SmartDashboard.putBoolean("Rejected due to too-far pose", false);
 
       LimelightHelpers.SetRobotOrientation(limelight.getName(),
         odometry.getEstimatedPosition().getRotation().getDegrees(), navx.getRate(), 0, 0, 0, 0);
@@ -155,8 +155,8 @@ public class LimelightContainer {
       }
 
       if(Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .5){
-        //doRejectUpdate = true;
-        SmartDashboard.putBoolean("Rejected due to too-far pose", doRejectUpdate);
+        //doRejectUpdate = true; // Re-implement this!
+        SmartDashboard.putBoolean("Rejected due to too-far pose", true);
       }
  
       if (!doRejectUpdate) {
@@ -169,10 +169,10 @@ public class LimelightContainer {
               mt2.timestampSeconds);
         }
         else if (mt2.tagCount >= 2){
-          //odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.4, .4, 999));
-          //odometry.addVisionMeasurement(
-          //    mt2.pose,
-          //    mt2.timestampSeconds);
+          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.4, .4, 999));
+          odometry.addVisionMeasurement(
+              mt2.pose,
+              mt2.timestampSeconds);
 
         }
 
