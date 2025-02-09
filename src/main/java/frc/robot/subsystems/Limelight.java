@@ -51,7 +51,6 @@ public class Limelight extends SubsystemBase {
                 }
             }
         }
-        SmartDashboard.putNumber(name, numTargets());
     }
 
     public int numTargets() {
@@ -97,6 +96,7 @@ public class Limelight extends SubsystemBase {
                 borderx = (area + 0.75) * 0.22 * targetTranslations.length + .2; // relatively randomly generated border
                 bordery = (area + 0.5) * 0.22 * targetTranslations.length;
             } 
+
             //todo optimize
 
             else {
@@ -105,15 +105,15 @@ public class Limelight extends SubsystemBase {
                     bordery = 0.75;
                 } 
                 else if (area > .015){ 
-                    borderx = 2; 
+                    borderx = 1; 
                     bordery = 0.25;
                 }
                 else if (area > .005){
-                    borderx = 1.5;
-                    bordery = 1.5;
+                    borderx = 1;
+                    bordery = 1;
                 }
                 else { 
-                    borderx = 0.75;
+                    borderx = 1;
                     bordery = 0.25;
                 }
             }
@@ -136,9 +136,13 @@ public class Limelight extends SubsystemBase {
             //borderx = 1;
             //bordery = .25;
 
+            double xlim = (xc - borderx < -1) ? -1 : xc - borderx;
+            double xlim2 = (xc - borderx > 1) ? 1 : xc + borderx;
+            double ylim = (yc - bordery < -1) ? -1 : yc - borderx;
+            double ylim2 = (yc - bordery > 1) ? 1 : xc + borderx;
 
             if (useCrop) {
-                LimelightHelpers.setCropWindow(name, xc - borderx, xc + borderx, yc - bordery, yc + bordery);
+                LimelightHelpers.setCropWindow(name, xlim, xlim2, ylim, ylim2);
                 // Finds the center of the targets, tries to build a big enough box from there
             }
         }

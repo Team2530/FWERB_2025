@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import java.util.List;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -45,11 +47,15 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.PathPlannerConstants;
 import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.SwerveModuleConstants;
+import frc.robot.util.LimelightContainer;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 
 public class SwerveSubsystem extends SubsystemBase {
+
+    int counter = 0;
+
     SwerveModule frontLeft = new SwerveModule(SwerveModuleConstants.FL_STEER_ID, SwerveModuleConstants.FL_DRIVE_ID,
             SwerveModuleConstants.FL_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.FL_OFFSET_RADIANS,
             SwerveModuleConstants.FL_ABSOLUTE_ENCODER_REVERSED,
@@ -178,10 +184,14 @@ public class SwerveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
 
-        if (!isalliancereset && DriverStation.getAlliance().isPresent()) {
-            Translation2d pospose = getPose().getTranslation();
+        if ((!isalliancereset && DriverStation.getAlliance().isPresent())) {
+            callmt1lots();
+            Translation2d pospose = getPose().getTranslation(); 
+
             odometry.resetPosition(getRotation2d(), getModulePositions(),
-                    new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Blue ? 0.0 : Math.PI)));
+                    new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Red ? 0.0 : Math.PI)));
+
+
             isalliancereset = true;
         }
 
@@ -192,8 +202,9 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isTeleopEnabled()) {
             RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
         } else {
-            //updateVisionOdometry();
+            RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
         }
+
 
         odometry.update(getRotation2d(), getModulePositions());
         // if (DriverStation.getAlliance().isPresent()) {
@@ -236,6 +247,13 @@ public class SwerveSubsystem extends SubsystemBase {
         chassisRotX.append(navX.getRawGyroX());
         chassisRotY.append(navX.getRawGyroY());
         chassisRotZ.append(navX.getRawGyroZ());
+        
+    }
+
+    public void callmt1lots(){
+        for(int i = 0; i < 30; i++){
+            RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
+        }
     }
 
     public void zeroHeading() {
@@ -264,7 +282,7 @@ public class SwerveSubsystem extends SubsystemBase {
         setHeading(Units.radiansToDegrees(pose.getRotation().times(-1.0).getRadians()
                 + (FieldConstants.getAlliance() == Alliance.Red ? Math.PI : 0.0)));
 
-        SmartDashboard.putNumber("HEading reset to", getHeading());
+        SmartDashboard.putNumber("Haading reset to", getHeading());
         SmartDashboard.putBoolean("HASBEENREET", true);
         odometry.resetPosition(getRotation2d(), getModulePositions(), pose);
     }
@@ -410,59 +428,8 @@ public class SwerveSubsystem extends SubsystemBase {
         return path;
     }
 
-    public void updateVisionOdometry() {
-        boolean doRejectUpdate = false;
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
-        if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
-            if (mt1.rawFiducials[0].ambiguity > .7) {
-                doRejectUpdate = true;
-            }
-            // if (mt1.rawFiducials[0].distToCamera > 3) {
-            if (mt1.rawFiducials[0].distToCamera > 5) { // TODO: TUNE!!!
-
-                doRejectUpdate = true;
-            }
-        }
-        if (mt1.tagCount == 0) {
-            doRejectUpdate = true;
-        }
-
-        if (!doRejectUpdate) {
-            // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
-            odometry.setVisionMeasurementStdDevs(createVisionMeasurementStdDevs(
-                    PoseConstants.kVisionStdDevX,
-                    PoseConstants.kVisionStdDevY,
-                    PoseConstants.kVisionStdDevTheta));
-            odometry.addVisionMeasurement(
-                    mt1.pose,
-                    mt1.timestampSeconds);
-        }
-    }
-
-    public void updateMegaTagOdometry() {
-        boolean doRejectUpdate = false;
-        LimelightHelpers.SetRobotOrientation("limelight", odometry.getEstimatedPosition().getRotation().getDegrees(), 0,
-                0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        if (Math.abs(navX.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore
-                                            // vision updates
-        {
-            doRejectUpdate = true;
-        }
-
-        if (mt2.tagCount <= 0) {
-            doRejectUpdate = true;
-        }
-        if (!doRejectUpdate) {
-            // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(2,2,2.0*PoseConstants.kVisionStdDevTheta));
-            odometry.setVisionMeasurementStdDevs(VecBuilder.fill(2, 2, 9999999));
-
-            odometry.addVisionMeasurement(
-                    mt2.pose,
-                    mt2.timestampSeconds);
-        }
-    }
+    
 
     public Vector<N3> createStateStdDevs(double x, double y, double theta) {
         return VecBuilder.fill(x, y, Units.degreesToRadians(theta));
