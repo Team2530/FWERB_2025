@@ -103,7 +103,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         swerveDriveSubsystem.setDefaultCommand(normalDrive);
-        NamedCommands.registerCommand("Testing", new ElevatorCommand(elevator, ElevatorPresets.TOP, 0.0));
+       // NamedCommands.registerCommand("Testing", Command);
         /*NamedCommands.registerCommand("Testing Algae", new SequentialCommandGroup(
                 new InstantCommand(() -> {
                     algaeSubsystem.setAlgaePreset(AlgaePresets.FLOOR);
