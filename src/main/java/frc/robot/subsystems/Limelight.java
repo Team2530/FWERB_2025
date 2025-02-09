@@ -100,9 +100,13 @@ public class Limelight extends SubsystemBase {
             //todo optimize
 
             else {
-                if (area > 0.75) {  //Remember that "area" only refers to the area of the largest apriltag
-                    borderx = 0.75; 
-                    bordery = 0.75;
+                if (area > 0.75){
+                    borderx = 1;
+                    bordery = 1;
+                }
+                else if (area > 0.5) {  //Remember that "area" only refers to the area of the largest apriltag
+                    borderx = 0.8; 
+                    bordery = 0.8;
                 } 
                 else if (area > .015){ 
                     borderx = 1; 
@@ -135,7 +139,7 @@ public class Limelight extends SubsystemBase {
             */
             //borderx = 1;
             //bordery = .25;
-
+            // Doesn't let borders extend beyond -1, 1 for x & y
             double xlim = (xc - borderx < -1) ? -1 : xc - borderx;
             double xlim2 = (xc - borderx > 1) ? 1 : xc + borderx;
             double ylim = (yc - bordery < -1) ? -1 : yc - borderx;
