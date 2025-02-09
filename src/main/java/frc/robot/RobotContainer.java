@@ -60,7 +60,7 @@ public class RobotContainer {
      */
     public RobotContainer() {
         // Configure the trigger bindings
-        configureBindings();
+        
 
         DataLogManager.logNetworkTables(true);
         DataLogManager.start();
@@ -103,7 +103,14 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         swerveDriveSubsystem.setDefaultCommand(normalDrive);
-        NamedCommands.registerCommand("Testing", elevatorToTop);
+        NamedCommands.registerCommand("Testing", new ElevatorCommand(elevator, ElevatorPresets.TOP, 0.0));
+        /*NamedCommands.registerCommand("Testing Algae", new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    algaeSubsystem.setAlgaePreset(AlgaePresets.FLOOR);
+                }))); */
+        // Configure the trigger bindings
+        configureBindings();
+        
     }
 
     // Command shootAction =
