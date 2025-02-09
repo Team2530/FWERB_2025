@@ -186,10 +186,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
         if ((!isalliancereset && DriverStation.getAlliance().isPresent())) {
             callmt1lots();
-            Translation2d pospose = getPose().getTranslation(); 
+            //Translation2d pospose = getPose().getTranslation(); 
 
-            odometry.resetPosition(getRotation2d(), getModulePositions(),
-                    new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Red ? 0.0 : Math.PI)));
+            //odometry.resetPosition(getRotation2d(), getModulePositions(),
+             //       new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Red ? 0.0 : Math.PI))); //frankly this don't even matter since the LL overrides
 
 
             isalliancereset = true;
@@ -201,7 +201,11 @@ public class SwerveSubsystem extends SubsystemBase {
  
         if (DriverStation.isTeleopEnabled()) {
             RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
-        } else {
+        }
+        else if (DriverStation.isAutonomous()){
+            RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
+        }
+        else {
             RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
         }
 
@@ -251,8 +255,8 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void callmt1lots(){
-        for(int i = 0; i < 30; i++){
-            RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
+        for(int i = 0; i < 50; i++){
+            RobotContainer.LLContainer.estimateMT1OdometryPrelim(odometry, lastChassisSpeeds, navX, getModulePositions());
         }
     }
 

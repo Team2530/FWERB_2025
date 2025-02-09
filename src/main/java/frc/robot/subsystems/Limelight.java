@@ -102,11 +102,11 @@ public class Limelight extends SubsystemBase {
             else {
                 if (area > 0.75){
                     borderx = 1;
-                    bordery = 1;
+                    bordery = .5;
                 }
                 else if (area > 0.5) {  //Remember that "area" only refers to the area of the largest apriltag
                     borderx = 0.8; 
-                    bordery = 0.8;
+                    bordery = 0.5;
                 } 
                 else if (area > .015){ 
                     borderx = 1; 
@@ -114,11 +114,11 @@ public class Limelight extends SubsystemBase {
                 }
                 else if (area > .005){
                     borderx = 1;
-                    bordery = 1;
+                    bordery = .5;
                 }
                 else { 
                     borderx = 1;
-                    bordery = 0.25;
+                    bordery = .5;
                 }
             }
 

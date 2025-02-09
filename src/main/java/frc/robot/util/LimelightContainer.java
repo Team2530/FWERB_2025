@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.Limelight;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 public class LimelightContainer {
   static int SIMCOUNTER = 0;
@@ -53,9 +54,7 @@ public class LimelightContainer {
 
 
 
-  public void estimateMT1Odometry(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx) {
-
-
+  public void estimateMT1OdometryPrelim(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx, SwerveModulePosition[] swerveModulePositions) {
     for (Limelight limelight : limelights) {
       boolean doRejectUpdate = false;
 
@@ -75,27 +74,67 @@ public class LimelightContainer {
       
       if (!doRejectUpdate) {
         
-        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, .1));
-        odometry.addVisionMeasurement(
-            mt1.pose,
-            mt1.timestampSeconds);
-            
-      } 
-            
-      SmartDashboard.putString("Pos MT1: ", mt1.pose.toString()+" " + RLCountermt1);
+        //odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.2, .2, .2));
+        //odometry.addVisionMeasurement(
+            //mt1.pose,
+            //mt1.timestampSeconds);
+
+        odometry.resetPosition(mt1.pose.getRotation(), swerveModulePositions, mt1.pose);
+        
+        SmartDashboard.putString("Pos MT1 prelim: ", mt1.pose.toString()+" " + RLCountermt1);
+      }
+       
+      
       RLCountermt1++;
     }
   }
   
+  public void estimateMT1Odometry(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx) {
+    for (Limelight limelight : limelights) {
+      boolean doRejectUpdate = false;
+
+      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
+
+      if(mt1==null){
+        continue;
+      }
+
+      if(mt1.tagCount == 0){
+        doRejectUpdate = true;
+      }
+
+      if (Math.abs(navx.getRate()) > 720) {
+        doRejectUpdate = true;
+      }
+      
+      if (!doRejectUpdate) {
+        
+         odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.2, .2, .2));
+         odometry.addVisionMeasurement(
+              mt1.pose,
+              mt1.timestampSeconds);
+
+        
+        SmartDashboard.putString("Pos MT1: ", mt1.pose.toString()+" " + RLCountermt1);
+      }
+       
+      
+      RLCountermt1++;
+    }
+  }
 
   public void estimateMT2Odometry(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx) {
 
     for (Limelight limelight : limelights) {
       boolean doRejectUpdate = false;
 
+      SmartDashboard.putBoolean("Rejected due to too-far pose", doRejectUpdate);
+
       LimelightHelpers.SetRobotOrientation(limelight.getName(),
         odometry.getEstimatedPosition().getRotation().getDegrees(), navx.getRate(), 0, 0, 0, 0);
-      
+
+      SmartDashboard.putString("Estimated odometry position for mt2", odometry.getEstimatedPosition().getRotation().toString());
+
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
 
 
@@ -115,15 +154,29 @@ public class LimelightContainer {
         doRejectUpdate = true;
       }
 
+      if(Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .5){
+        //doRejectUpdate = true;
+        SmartDashboard.putBoolean("Rejected due to too-far pose", doRejectUpdate);
+      }
+ 
       if (!doRejectUpdate) {
 
         SmartDashboard.putString("Pos (mt2): ", mt2.pose.toString()+" "+ RLCOUNTER);
-           
-        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, .5));
-        odometry.addVisionMeasurement(
-            mt2.pose,
-            mt2.timestampSeconds);
-            
+        if(mt2.tagCount == 1){
+          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999));
+          odometry.addVisionMeasurement(
+              mt2.pose,
+              mt2.timestampSeconds);
+        }
+        else if (mt2.tagCount >= 2){
+          //odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.4, .4, 999));
+          //odometry.addVisionMeasurement(
+          //    mt2.pose,
+          //    mt2.timestampSeconds);
+
+        }
+
+        SmartDashboard.putNumber("Dist", mt2.avgTagDist);
       } 
       RLCOUNTER++;  
     }
