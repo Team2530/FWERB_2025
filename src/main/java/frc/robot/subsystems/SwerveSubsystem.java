@@ -185,13 +185,14 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic() {
 
         if ((!isalliancereset && DriverStation.getAlliance().isPresent())) {
+
             callmt1lots();
             //Translation2d pospose = getPose().getTranslation(); 
 
             //odometry.resetPosition(getRotation2d(), getModulePositions(),
              //       new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Red ? 0.0 : Math.PI))); //frankly this don't even matter since the LL overrides
 
-
+            SmartDashboard.putString("Prelim odometry position", odometry.getEstimatedPosition().toString());
             isalliancereset = true;
         }
 
