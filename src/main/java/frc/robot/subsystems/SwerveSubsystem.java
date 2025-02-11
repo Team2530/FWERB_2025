@@ -180,7 +180,7 @@ public class SwerveSubsystem extends SubsystemBase {
         chassisRotY = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/y");
         chassisRotZ = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/z");
     }
-
+    int mod = 0;
     @Override
     public void periodic() {
 
@@ -200,11 +200,13 @@ public class SwerveSubsystem extends SubsystemBase {
         // WARNING: REMOVE IF USING TAG FOLLOW!!!
         // updateVisionOdometry();
  
-        if (DriverStation.isTeleopEnabled()) {
+        if (DriverStation.isTeleopEnabled() || DriverStation.isAutonomousEnabled()) {
+            if(mod % 100 == 0){
+                RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
+            }
             RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
-        }
-        else if (DriverStation.isAutonomous()){
-            RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
+            RobotContainer.LLContainer.estimateSimMT1();
+            mod++;
         }
         else {
             RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);

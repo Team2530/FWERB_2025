@@ -15,6 +15,8 @@ import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.Limelight;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class LimelightContainer {
   static int SIMCOUNTER = 0;
@@ -35,18 +37,18 @@ public class LimelightContainer {
     }
   }
 
-  public static void estimateSimOdometry() {
+  public static void estimateSimMT1() {
     for (Limelight limelight : limelights) {
       boolean doRejectUpdate = false;
-      LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
-      if (mt2 == null) { // in case not all limelights are connected
+      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
+      if (mt1 == null) { // in case not all limelights are connected
         continue;
       }
-      if (mt2.tagCount == 0) {
+      if (mt1.tagCount == 0) {
         doRejectUpdate = true;
       }
       if (!doRejectUpdate) {
-        SmartDashboard.putString("Simulated Pos", mt2.pose.toString() + SIMCOUNTER);
+        SmartDashboard.putString("Simulated Pos MT1", mt1.pose.toString() + SIMCOUNTER);
         SIMCOUNTER++;
       }
     }
@@ -55,8 +57,9 @@ public class LimelightContainer {
   public void estimateMT1OdometryPrelim(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx,
       SwerveModulePosition[] swerveModulePositions) {
     int framesChecked = 0;
+    ArrayList<Pose2d> validPoses = new ArrayList<>();
 
-    for (int i = 0; (i < 200) && (framesChecked < 4); i++) {
+    for (int i = 0; (i < 100) && (framesChecked < 10); i++) {
       for (Limelight limelight : limelights) {
 
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
@@ -68,10 +71,6 @@ public class LimelightContainer {
           framesChecked++;
           boolean doRejectUpdate = false;
 
-          // if(mt1==null){
-          // continue;
-          // }
-
           if (mt1.tagCount == 0) {
             doRejectUpdate = true;
           }
@@ -81,13 +80,7 @@ public class LimelightContainer {
           }
 
           if (!doRejectUpdate) {
-            // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.2, .2, .2));
-            // odometry.addVisionMeasurement(
-            //     mt1.pose,
-            //     mt1.timestampSeconds);
-
-
-            odometry.resetPosition(mt1.pose.getRotation(), swerveModulePositions, mt1.pose);
+            validPoses.add(mt1.pose);
 
             SmartDashboard.putString("Pos MT1 prelim: ", mt1.pose.toString() + " " + RLCountermt1);
           }
@@ -96,6 +89,20 @@ public class LimelightContainer {
           limelight.setLastFrame(currtime);
         }
       }
+    }
+
+    if (!validPoses.isEmpty()) {
+      double avgX = 0, avgY = 0, avgRotation = 0;
+      for (Pose2d pose : validPoses) {
+        avgX += pose.getX();
+        avgY += pose.getY();
+        avgRotation += pose.getRotation().getDegrees();
+      }
+      avgX /= validPoses.size();
+      avgY /= validPoses.size();
+      avgRotation /= validPoses.size();
+
+      odometry.resetPosition(Rotation2d.fromDegrees(avgRotation), swerveModulePositions, new Pose2d(avgX, avgY, Rotation2d.fromDegrees(avgRotation)));
     }
   }
 
@@ -119,12 +126,11 @@ public class LimelightContainer {
 
       if (!doRejectUpdate) {
 
-        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.2, .2, 999));
+        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.9, .9, .2));
         odometry.addVisionMeasurement(
             mt1.pose,
             mt1.timestampSeconds);
 
-        SmartDashboard.putString("Pos MT1: ", mt1.pose.toString() + " " + RLCountermt1);
       }
 
       RLCountermt1++;
@@ -136,13 +142,13 @@ public class LimelightContainer {
     for (Limelight limelight : limelights) {
       boolean doRejectUpdate = false;
 
-      SmartDashboard.putBoolean("Rejected due to too-far pose", false);
 
       LimelightHelpers.SetRobotOrientation(limelight.getName(),
           odometry.getEstimatedPosition().getRotation().getDegrees(), navx.getRate(), 0, 0, 0, 0);
 
 
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
+      //LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
 
       if (mt2 == null) {
         continue;
@@ -160,22 +166,22 @@ public class LimelightContainer {
         doRejectUpdate = true;
       }
 
-      // if (Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .5) {
-      //   // doRejectUpdate = true; // Re-implement this!
-      //   SmartDashboard.putBoolean("Rejected due to too-far pose", true);
-      // }
+      if (Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .4) {
+        doRejectUpdate = true; // Re-implement this!
+         SmartDashboard.putBoolean("Rejected due to too-far pose", true);
+       }
 
       if (!doRejectUpdate) {
 
         SmartDashboard.putString("Pos (mt2): ", mt2.pose.toString() + " " + RLCOUNTER);
 
         if (mt2.tagCount == 1) {
-          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 999999));
+          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.4, .4, .3));
           odometry.addVisionMeasurement(
               mt2.pose,
               mt2.timestampSeconds);
         } else if (mt2.tagCount >= 2) {
-          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.2, .2, .2));
+          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.1, .1, .1));
           odometry.addVisionMeasurement(
               mt2.pose,
               mt2.timestampSeconds);

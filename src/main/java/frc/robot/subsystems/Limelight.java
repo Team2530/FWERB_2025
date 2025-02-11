@@ -60,7 +60,7 @@ public class Limelight extends SubsystemBase {
 
     public void smartCrop() {
         LimelightHelpers.PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
-
+        if(poseEstimate == null){return;}
         if (lastPoseEstimate != poseEstimate.timestampSeconds){
             counter = ++counter % 50;
             if(counter > 40){ // For every 5 frames, out of 50, check the entire screen for apriltags
