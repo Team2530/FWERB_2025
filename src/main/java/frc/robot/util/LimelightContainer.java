@@ -56,7 +56,6 @@ public class LimelightContainer {
     }
   }
 
-// currently does nothing dw about it, will eventually take a weighted average & eliminate outliers
   public void estimateMT1OdometryPrelim(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx,
       SwerveModulePosition[] swerveModulePositions) {
     int framesChecked = 0;
