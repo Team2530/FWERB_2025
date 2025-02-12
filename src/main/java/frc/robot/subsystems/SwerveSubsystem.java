@@ -185,10 +185,12 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic() {
 
         if ((!isalliancereset && DriverStation.getAlliance().isPresent())) {
+            RobotContainer.LLContainer.estimateMT1OdometryPrelim(odometry, lastChassisSpeeds, navX, getModulePositions());
 
-            callmt1lots();
+            /*
+             * Old implementation, that set pose to 0, as well as angle to 0 or pi radians
+             */
             //Translation2d pospose = getPose().getTranslation(); 
-
             //odometry.resetPosition(getRotation2d(), getModulePositions(),
              //       new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Red ? 0.0 : Math.PI))); //frankly this don't even matter since the LL overrides
 
@@ -205,7 +207,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
             }
             RobotContainer.LLContainer.estimateMT2Odometry(odometry, lastChassisSpeeds, navX);
-            RobotContainer.LLContainer.estimateSimMT1();
+            RobotContainer.LLContainer.estimateSimMT1(); // for debugging
             mod++;
         }
         else {
@@ -257,11 +259,6 @@ public class SwerveSubsystem extends SubsystemBase {
         
     }
 
-    public void callmt1lots(){
-        for(int i = 0; i < 50; i++){
-            RobotContainer.LLContainer.estimateMT1OdometryPrelim(odometry, lastChassisSpeeds, navX, getModulePositions());
-        }
-    }
 
     public void zeroHeading() {
         setHeading(0);

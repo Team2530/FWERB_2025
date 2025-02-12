@@ -33,7 +33,9 @@ public class LimelightContainer {
 
   public void enableLimelights(boolean enable) {
     for (Limelight limelight : limelights) {
-      limelight.setEnabled(enable);
+      if(limelight != null){
+        limelight.setEnabled(enable);
+      }
     }
   }
 
@@ -54,6 +56,7 @@ public class LimelightContainer {
     }
   }
 
+// currently does nothing dw about it, will eventually take a weighted average & eliminate outliers
   public void estimateMT1OdometryPrelim(SwerveDrivePoseEstimator odometry, ChassisSpeeds speeds, AHRS navx,
       SwerveModulePosition[] swerveModulePositions) {
     int framesChecked = 0;
@@ -63,9 +66,11 @@ public class LimelightContainer {
       for (Limelight limelight : limelights) {
 
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
+
         if (mt1 == null) {
           continue;
         }
+
         double currtime = mt1.timestampSeconds;
         if (currtime != limelight.getLastFrameTime()) {
           framesChecked++;
@@ -81,7 +86,6 @@ public class LimelightContainer {
 
           if (!doRejectUpdate) {
             validPoses.add(mt1.pose);
-
             SmartDashboard.putString("Pos MT1 prelim: ", mt1.pose.toString() + " " + RLCountermt1);
           }
 
@@ -123,14 +127,17 @@ public class LimelightContainer {
       if (Math.abs(navx.getRate()) > 720) {
         doRejectUpdate = true;
       }
+      
+      if (Math.abs(odometry.getEstimatedPosition().getX() - mt1.pose.getX()) > .4) {
+        doRejectUpdate = true; 
+        SmartDashboard.putBoolean("Rejected due to too-far pose", true);
+       }
 
       if (!doRejectUpdate) {
-
         odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.9, .9, .2));
         odometry.addVisionMeasurement(
             mt1.pose,
             mt1.timestampSeconds);
-
       }
 
       RLCountermt1++;
@@ -148,7 +155,6 @@ public class LimelightContainer {
 
 
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight.getName());
-      //LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
 
       if (mt2 == null) {
         continue;
@@ -167,9 +173,9 @@ public class LimelightContainer {
       }
 
       if (Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .4) {
-        doRejectUpdate = true; // Re-implement this!
-         SmartDashboard.putBoolean("Rejected due to too-far pose", true);
-       }
+        doRejectUpdate = true; 
+        SmartDashboard.putBoolean("Rejected due to too-far pose", true);
+      }
 
       if (!doRejectUpdate) {
 
