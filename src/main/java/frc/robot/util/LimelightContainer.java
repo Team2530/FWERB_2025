@@ -61,7 +61,7 @@ public class LimelightContainer {
     int framesChecked = 0;
     ArrayList<Pose2d> validPoses = new ArrayList<>();
 
-    for (int i = 0; (i < 100) && (framesChecked < 10); i++) {
+    for (int i = 0; (i < 200) && (framesChecked < 15); i++) {
       for (Limelight limelight : limelights) {
 
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight.getName());
@@ -85,7 +85,7 @@ public class LimelightContainer {
 
           if (!doRejectUpdate) {
             validPoses.add(mt1.pose);
-            SmartDashboard.putString("Pos MT1 prelim: ", mt1.pose.toString() + " " + RLCountermt1);
+
           }
 
           RLCountermt1++;
@@ -106,6 +106,7 @@ public class LimelightContainer {
       avgRotation /= validPoses.size();
 
       odometry.resetPosition(Rotation2d.fromDegrees(avgRotation), swerveModulePositions, new Pose2d(avgX, avgY, Rotation2d.fromDegrees(avgRotation)));
+      SmartDashboard.putString("Pos MT1 prelim: ", " " + avgX + " " + avgY + " " + Rotation2d.fromDegrees(avgRotation));
     }
   }
 
@@ -127,13 +128,13 @@ public class LimelightContainer {
         doRejectUpdate = true;
       }
       
-      if (Math.abs(odometry.getEstimatedPosition().getX() - mt1.pose.getX()) > .4) {
+      if (Math.abs(odometry.getEstimatedPosition().getX() - mt1.pose.getX()) > .2) {
         doRejectUpdate = true; 
         SmartDashboard.putBoolean("Rejected due to too-far pose", true);
        }
 
       if (!doRejectUpdate) {
-        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.9, .9, .2));
+        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.9, .9, 99999));
         odometry.addVisionMeasurement(
             mt1.pose,
             mt1.timestampSeconds);
@@ -171,7 +172,7 @@ public class LimelightContainer {
         doRejectUpdate = true;
       }
 
-      if (Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .4) {
+      if (Math.abs(odometry.getEstimatedPosition().getX() - mt2.pose.getX()) > .2) {
         doRejectUpdate = true; 
         SmartDashboard.putBoolean("Rejected due to too-far pose", true);
       }
@@ -181,19 +182,17 @@ public class LimelightContainer {
         SmartDashboard.putString("Pos (mt2): ", mt2.pose.toString() + " " + RLCOUNTER);
 
         if (mt2.tagCount == 1) {
-          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.4, .4, .3));
+          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.4, .4, 9999));
           odometry.addVisionMeasurement(
               mt2.pose,
               mt2.timestampSeconds);
         } else if (mt2.tagCount >= 2) {
-          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.1, .1, .1));
+          odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.1, .1, 9999));
           odometry.addVisionMeasurement(
               mt2.pose,
               mt2.timestampSeconds);
 
         }
-
-        SmartDashboard.putNumber("Dist", mt2.avgTagDist);
       }
       RLCOUNTER++;
     }

@@ -186,7 +186,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
         if ((!isalliancereset && DriverStation.getAlliance().isPresent())) {
             RobotContainer.LLContainer.estimateMT1OdometryPrelim(odometry, lastChassisSpeeds, navX, getModulePositions());
-
             /*
              * Old implementation, that set pose to 0, as well as angle to 0 or pi radians
              */
@@ -215,7 +214,11 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
 
-        odometry.update(getRotation2d(), getModulePositions());
+        
+        //odometry.update(getRotation2d(), getModulePositions());
+
+
+
         // if (DriverStation.getAlliance().isPresent()) {
         // switch (DriverStation.getAlliance().get()) {
         // case Red:
@@ -230,7 +233,9 @@ public class SwerveSubsystem extends SubsystemBase {
         // }
         // } else {
         // // If no alliance provided, just go with blue
+
         field.setRobotPose(getPose());
+        
         // }
 
         SmartDashboard.putData("Field", field);
@@ -298,6 +303,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getRotation2d() {
         return new Rotation2d(getHeading());
     }
+    
 
     public void stopDrive() {
         frontLeft.stop();
