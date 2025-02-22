@@ -292,20 +292,20 @@ public class SwerveSubsystem extends SubsystemBase {
         backRight.setModuleState(states[Constants.DriveConstants.ModuleIndices.REAR_RIGHT]);
         backLeft.setModuleState(states[Constants.DriveConstants.ModuleIndices.REAR_LEFT]);
     }
-    /*
-    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
-        chassisSpeeds.vxMetersPerSecond *= -1;
-        chassisSpeeds.vyMetersPerSecond *= -1;
-        swerveDrive.setChassisSpeeds(chassisSpeeds);
-    }
-    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+
+    /*public void setChassisSpeedsAuto(ChassisSpeeds speeds) {
+        speeds.vxMetersPerSecond *= -1;
+        speeds.vyMetersPerSecond *= -1;
+        swerveDrive.setChassisSpeeds(speeds);
+    } */
+    /*public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
         swerveDrive.setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond,
           -chassisSpeeds.omegaRadiansPerSecond));
-    }
-    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+    } */
+
+    /* public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
         setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond));
-    }
-    */
+    } */
     public void setChassisSpeedsAUTO(ChassisSpeeds speeds) {
         double tmp = speeds.vxMetersPerSecond;
         speeds.vxMetersPerSecond = speeds.vyMetersPerSecond;
