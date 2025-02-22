@@ -130,10 +130,12 @@ public class SwerveSubsystem extends SubsystemBase {
         // Handle exception as needed
         e.printStackTrace();
         }
-        AutoBuilder.configure(
+         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
                 this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                (speeds, feedforward) -> setChassisSpeedsAUTO(speeds), // Method that will drive the robot given ROBOT
+                                                                       // RELATIVE ChassisSpeeds
                 //(speeds, feedforward) -> setChassisSpeedsAUTO(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
                 /*PathPlannerConstants.HOLONOMIC_FOLLOWER_CONTROLLER, // todo -> check above method^^^
                 PathPlannerConstants.ROBOT_CONFIG,
@@ -148,7 +150,6 @@ public class SwerveSubsystem extends SubsystemBase {
                     }
 
                     return false; */
-                (speeds, feedforwards) -> setChassisSpeedsAUTO(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                 new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                     new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
@@ -168,8 +169,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 },
                 this // Reference to this subsystem to set requirements
         );
-
-        NamedCommands.registerCommand("namedCommand", new PrintCommand("Ran namedCommand"));
+       NamedCommands.registerCommand("namedCommand", new PrintCommand("Ran namedCommand"));
 
         chassisAccelX = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/acceleration/x");
         chassisAccelY = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/acceleration/y");
@@ -264,14 +264,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         // TODO: TEST
-        if(pose!=null){
         setHeading(Units.radiansToDegrees(pose.getRotation().times(-1.0).getRadians()
                 + (FieldConstants.getAlliance() == Alliance.Red ? Math.PI : 0.0)));
 
-        SmartDashboard.putNumber("Haading reset to", getHeading());
+        SmartDashboard.putNumber("HEading reset to", getHeading());
         SmartDashboard.putBoolean("HASBEENREET", true);
         odometry.resetPosition(getRotation2d(), getModulePositions(), pose);
-        }
     }
 
     public double getHeading() {
@@ -314,14 +312,17 @@ public class SwerveSubsystem extends SubsystemBase {
         setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond));
     }
     */
+
+    
     public void setChassisSpeedsAUTO(ChassisSpeeds speeds) {
         double tmp = speeds.vxMetersPerSecond;
-        speeds.vxMetersPerSecond = speeds.vyMetersPerSecond;
-        speeds.vyMetersPerSecond = tmp;
+        speeds.vxMetersPerSecond = -speeds.vxMetersPerSecond;
+        speeds.vyMetersPerSecond = -speeds.vyMetersPerSecond;
+        // speeds.vyMetersPerSecond = tmp;
 
-        //speeds.vxMetersPerSecond *= 0.3;
-        //speeds.vyMetersPerSecond *= 0.3;
-        tmp = speeds.omegaRadiansPerSecond;
+        // //speeds.vxMetersPerSecond *= 0.3;
+        // //speeds.vyMetersPerSecond *= 0.3;
+        // tmp = speeds.omegaRadiansPerSecond;
         speeds.omegaRadiansPerSecond *= -1; 
         SwerveModuleState[] states = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
         setModules(states);

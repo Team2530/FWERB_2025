@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Test"
+            "pathName": "Pathts"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }
