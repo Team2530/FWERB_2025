@@ -41,14 +41,12 @@ public final class Constants {
     public static final double robotWidthMeters = Units.inchesToMeters(25.0);
     public static final double robotLengthMeters = Units.inchesToMeters(25.0);
     
-      // TODO: ############## REPLACE PLACEHOLDERS ##############
-      public static final double TOTAL_MASS_KG = 30; // 107lbs
-      public static final double MOMENT_OF_INERTIA = 3;
+      public static final double TOTAL_MASS_KG = 43.9985; // 97lbs
+      public static final double MOMENT_OF_INERTIA = 4.35;
   }
 
   public static final class FieldConstants {
     public static final double GRAVITY = 9.81;
-    public static final double SPEAKER_HEIGHT = 2.05; // Meters
 
     public static Alliance getAlliance() {
       if (DriverStation.getAlliance().isPresent()) {
@@ -71,13 +69,13 @@ public final class Constants {
     public static final double STEER_RADIANS_PER_MINUTE = STEER_ROTATION_TO_RADIANS / 60d;
 
     // TODO: ############## REPLACE PLACEHOLDERS ##############
-    public static final double WHEEL_FRICTION_COEFFICIENT = 1;
+    public static final double WHEEL_FRICTION_COEFFICIENT = 1.2;
 
     // Actual drive gains
     // public static final double MODULE_KP = 0.5;
     // public static final double MODULE_KD = 0.03;
 
-    // NOTE: This may need additional tuning!
+    // NOTE: This may need additional tuning! PLEEEEEEEEEEEEEEEEEEASE WE GOTTA DO THIS (at some point)
     public static final double MODULE_KP = 0.46368;// 0.75628;// 0.7491; //.5;
     public static final double MODULE_KD = 0.0066806;// 0.0057682; //0.0076954;
 
@@ -123,7 +121,7 @@ public final class Constants {
     public static final double MAX_ROBOT_RAD_VELOCITY = 12.0; // Approx. Measured rads/sec
 
     // TODO: ############## REPLACE PLACEHOLDERS ##############
-    public static final double MAX_MODULE_CURRENT = 100;
+    public static final double MAX_MODULE_CURRENT = 60;
 
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
     public static final double WHEEL_BASE = Units.inchesToMeters(19.75);
