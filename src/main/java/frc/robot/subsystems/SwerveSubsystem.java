@@ -129,7 +129,7 @@ public class SwerveSubsystem extends SubsystemBase {
         } catch (Exception e) {
         // Handle exception as needed
         e.printStackTrace();
-        } 
+        }
         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
@@ -264,12 +264,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         // TODO: TEST
+        if(pose!=null){
         setHeading(Units.radiansToDegrees(pose.getRotation().times(-1.0).getRadians()
                 + (FieldConstants.getAlliance() == Alliance.Red ? Math.PI : 0.0)));
 
         SmartDashboard.putNumber("Haading reset to", getHeading());
         SmartDashboard.putBoolean("HASBEENREET", true);
         odometry.resetPosition(getRotation2d(), getModulePositions(), pose);
+        }
     }
 
     public double getHeading() {
