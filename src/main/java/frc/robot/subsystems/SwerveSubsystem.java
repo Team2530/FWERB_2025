@@ -1,48 +1,59 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import java.util.List;
 
-import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.FollowPathHolonomic;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.path.PathPoint;
+import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.LimelightHelpers;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.PathPlannerConstants;
+import frc.robot.Constants.PoseConstants;
+import frc.robot.Constants.SwerveModuleConstants;
 import frc.robot.Robot;
-import frc.robot.Constants.*;
-import frc.robot.LimelightHelpers.PoseEstimate;
+import frc.robot.RobotContainer;
 
 public class SwerveSubsystem extends SubsystemBase {
+
+    int counter = 0;
+
     SwerveModule frontLeft = new SwerveModule(SwerveModuleConstants.FL_STEER_ID, SwerveModuleConstants.FL_DRIVE_ID,
             SwerveModuleConstants.FL_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.FL_OFFSET_RADIANS,
             SwerveModuleConstants.FL_ABSOLUTE_ENCODER_REVERSED,
@@ -86,7 +97,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private RotationStyle rotationStyle = RotationStyle.Driver;
 
-    public final AHRS navX = new AHRS(SPI.Port.kMXP);
+    public final AHRS navX = new AHRS(AHRS.NavXComType.kMXP_SPI);
     private double navxSim;
 
     private ChassisSpeeds lastChassisSpeeds = new ChassisSpeeds();
@@ -112,13 +123,20 @@ public class SwerveSubsystem extends SubsystemBase {
         // zeroHeading()
 
         // --------- Path Planner Init ---------- \\
-
-        AutoBuilder.configureHolonomic(
+                RobotConfig config = null;
+        try{
+        config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+        // Handle exception as needed
+        e.printStackTrace();
+        } 
+        AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
                 this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                this::setChassisSpeedsAUTO, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                PathPlannerConstants.HOLONOMIC_FOLLOWER_CONFIG,
+                //(speeds, feedforward) -> setChassisSpeedsAUTO(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+                /*PathPlannerConstants.HOLONOMIC_FOLLOWER_CONTROLLER, // todo -> check above method^^^
+                PathPlannerConstants.ROBOT_CONFIG,
                 () -> {
                     // Boolean supplier that controls when the path will be mirrored for the red
                     // alliance
@@ -129,7 +147,23 @@ public class SwerveSubsystem extends SubsystemBase {
                         return alliance.get() == DriverStation.Alliance.Red;
                     }
 
-                    return false;
+                    return false; */
+                (speeds, feedforwards) -> setChassisSpeedsAUTO(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            ),
+            config, // The robot configuration
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
 
                 },
                 this // Reference to this subsystem to set requirements
@@ -144,7 +178,7 @@ public class SwerveSubsystem extends SubsystemBase {
         chassisRotY = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/y");
         chassisRotZ = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/z");
     }
-
+    int mod = 0;
     @Override
     public void periodic() {
 
@@ -155,17 +189,12 @@ public class SwerveSubsystem extends SubsystemBase {
             isalliancereset = true;
         }
 
-        // TODO: Test
-        // WARNING: REMOVE IF USING TAG FOLLOW!!!
-        // updateVisionOdometry();
 
-        if (DriverStation.isTeleopEnabled()) {
-            updateMegaTagOdometry();
-        } else {
-            updateVisionOdometry();
-        }
-
+        
         odometry.update(getRotation2d(), getModulePositions());
+
+
+
         // if (DriverStation.getAlliance().isPresent()) {
         // switch (DriverStation.getAlliance().get()) {
         // case Red:
@@ -180,7 +209,9 @@ public class SwerveSubsystem extends SubsystemBase {
         // }
         // } else {
         // // If no alliance provided, just go with blue
+
         field.setRobotPose(getPose());
+        
         // }
 
         SmartDashboard.putData("Field", field);
@@ -206,7 +237,9 @@ public class SwerveSubsystem extends SubsystemBase {
         chassisRotX.append(navX.getRawGyroX());
         chassisRotY.append(navX.getRawGyroY());
         chassisRotZ.append(navX.getRawGyroZ());
+        
     }
+
 
     public void zeroHeading() {
         setHeading(0);
@@ -234,7 +267,7 @@ public class SwerveSubsystem extends SubsystemBase {
         setHeading(Units.radiansToDegrees(pose.getRotation().times(-1.0).getRadians()
                 + (FieldConstants.getAlliance() == Alliance.Red ? Math.PI : 0.0)));
 
-        SmartDashboard.putNumber("HEading reset to", getHeading());
+        SmartDashboard.putNumber("Haading reset to", getHeading());
         SmartDashboard.putBoolean("HASBEENREET", true);
         odometry.resetPosition(getRotation2d(), getModulePositions(), pose);
     }
@@ -246,6 +279,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getRotation2d() {
         return new Rotation2d(getHeading());
     }
+    
 
     public void stopDrive() {
         frontLeft.stop();
@@ -264,12 +298,29 @@ public class SwerveSubsystem extends SubsystemBase {
         backLeft.setModuleState(states[Constants.DriveConstants.ModuleIndices.REAR_LEFT]);
     }
 
+    /*
+    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+        chassisSpeeds.vxMetersPerSecond *= -1;
+        chassisSpeeds.vyMetersPerSecond *= -1;
+        swerveDrive.setChassisSpeeds(chassisSpeeds);
+    }
+    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+        swerveDrive.setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond,
+          -chassisSpeeds.omegaRadiansPerSecond));
+    }
+    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+        setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond));
+    }
+    */
     public void setChassisSpeedsAUTO(ChassisSpeeds speeds) {
         double tmp = speeds.vxMetersPerSecond;
         speeds.vxMetersPerSecond = speeds.vyMetersPerSecond;
         speeds.vyMetersPerSecond = tmp;
+
+        //speeds.vxMetersPerSecond *= 0.3;
+        //speeds.vyMetersPerSecond *= 0.3;
         tmp = speeds.omegaRadiansPerSecond;
-        speeds.omegaRadiansPerSecond *= -1;
+        speeds.omegaRadiansPerSecond *= -1; 
         SwerveModuleState[] states = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
         setModules(states);
     }
@@ -330,22 +381,16 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public Command followPathCommand(String pathName) {
-        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
-
-        return new FollowPathHolonomic(
+        try {
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+            
+            return new FollowPathCommand(
                 path,
                 this::getPose, // Robot pose supplier
                 this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                this::setChassisSpeedsAUTO, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your
-                                                 // Constants class
-                        PathPlannerConstants.TRANSLATION_PID, // Translation PID constants
-                        PathPlannerConstants.ROTATION_PID, // Rotation PID constants
-                        DriveConstants.MAX_MODULE_VELOCITY, // Max module speed, in m/s
-                        DriveConstants.DRIVE_BASE_RADIUS, // Drive base radius in meters. Distance from robot center to
-                                                          // furthest module.
-                        new ReplanningConfig() // Default path replanning config. See the API for the options here
-                ),
+                (speeds, feedforward) -> setChassisSpeedsAUTO(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+                PathPlannerConstants.HOLONOMIC_FOLLOWER_CONTROLLER,
+                PathPlannerConstants.ROBOT_CONFIG,
                 () -> {
                     // Boolean supplier that controls when the path will be mirrored for the red
                     // alliance
@@ -359,12 +404,15 @@ public class SwerveSubsystem extends SubsystemBase {
                     return false;
                 },
                 this // Reference to this subsystem to set requirements
-        );
+            );
+        } catch (Exception exception) {
+            return Commands.none();
+        }
     }
 
-    public PathPlannerPath generateOTFPath(Translation2d... pathPoints) {
+    public PathPlannerPath generateOTFPath(PathPoint... pathPoints) {
         // Create the path using the bezier points created above
-        PathPlannerPath path = new PathPlannerPath(
+        PathPlannerPath path = PathPlannerPath.fromPathPoints(
                 List.of(pathPoints),
                 new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI), // The constraints for this path. If using a
                                                                          // differential drivetrain, the angular
@@ -380,59 +428,8 @@ public class SwerveSubsystem extends SubsystemBase {
         return path;
     }
 
-    public void updateVisionOdometry() {
-        boolean doRejectUpdate = false;
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
-        if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
-            if (mt1.rawFiducials[0].ambiguity > .7) {
-                doRejectUpdate = true;
-            }
-            // if (mt1.rawFiducials[0].distToCamera > 3) {
-            if (mt1.rawFiducials[0].distToCamera > 5) { // TODO: TUNE!!!
-
-                doRejectUpdate = true;
-            }
-        }
-        if (mt1.tagCount == 0) {
-            doRejectUpdate = true;
-        }
-
-        if (!doRejectUpdate) {
-            // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
-            odometry.setVisionMeasurementStdDevs(createVisionMeasurementStdDevs(
-                    PoseConstants.kVisionStdDevX,
-                    PoseConstants.kVisionStdDevY,
-                    PoseConstants.kVisionStdDevTheta));
-            odometry.addVisionMeasurement(
-                    mt1.pose,
-                    mt1.timestampSeconds);
-        }
-    }
-
-    public void updateMegaTagOdometry() {
-        boolean doRejectUpdate = false;
-        LimelightHelpers.SetRobotOrientation("limelight", odometry.getEstimatedPosition().getRotation().getDegrees(), 0,
-                0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        if (Math.abs(navX.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore
-                                            // vision updates
-        {
-            doRejectUpdate = true;
-        }
-
-        if (mt2.tagCount <= 0) {
-            doRejectUpdate = true;
-        }
-        if (!doRejectUpdate) {
-            // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(2,2,2.0*PoseConstants.kVisionStdDevTheta));
-            odometry.setVisionMeasurementStdDevs(VecBuilder.fill(2, 2, 9999999));
-
-            odometry.addVisionMeasurement(
-                    mt2.pose,
-                    mt2.timestampSeconds);
-        }
-    }
+    
 
     public Vector<N3> createStateStdDevs(double x, double y, double theta) {
         return VecBuilder.fill(x, y, Units.degreesToRadians(theta));

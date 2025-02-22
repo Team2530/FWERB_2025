@@ -4,33 +4,23 @@
 
 package frc.robot;
 
-import frc.robot.Constants.*;
-import frc.robot.commands.*;
-import frc.robot.commands.ElevatorCommand.ElevatorPresets;
+import java.util.function.DoubleSupplier;
 
-import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import frc.robot.subsystems.*;
-import frc.robot.subsystems.SwerveSubsystem.RotationStyle;
-
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import edu.wpi.first.wpilibj2.command.button.*;
-
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ControllerConstants;
+import frc.robot.commands.DriveCommand;
+import frc.robot.subsystems.SwerveSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a
@@ -41,6 +31,8 @@ import edu.wpi.first.wpilibj2.command.button.*;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+
 
     private final CommandXboxController driverXbox = new CommandXboxController(
             ControllerConstants.DRIVER_CONTROLLER_PORT);
@@ -58,14 +50,11 @@ public class RobotContainer {
     private final UsbCamera intakeCam = CameraServer.startAutomaticCapture();
     private final DriveCommand normalDrive = new DriveCommand(swerveDriveSubsystem, driverXbox.getHID());
 
-    private final ElevatorSubsystem elevator = new ElevatorSubsystem();
 
     /*
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        // Configure the trigger bindings
-        configureBindings();
 
         DataLogManager.logNetworkTables(true);
         DataLogManager.start();
@@ -114,10 +103,7 @@ public class RobotContainer {
     // Command alignAction = ; // Self-deadlines
     // Command spoolAction =
     // Command intakeAction = ;
-
-    private ElevatorCommand elevatorToTop = new ElevatorCommand(elevator, ElevatorPresets.TOP, 0.0);
-    private ElevatorCommand elevatorToMiddle = new ElevatorCommand(elevator, ElevatorPresets.MIDDLE, 0.0);
-    private ElevatorCommand elevatorToStow = new ElevatorCommand(elevator, ElevatorPresets.STOW, 0.0);
+    
 
     /**
      * Use this method to define your trigger->command mappings. Triggers can be
@@ -133,30 +119,6 @@ public class RobotContainer {
      * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
      * joysticks}.
      */
-    private void configureBindings() {
-        operatorXbox.a()
-                .onTrue(elevatorToStow);
-        operatorXbox.x()
-                .onTrue(elevatorToMiddle);
-        operatorXbox.y()
-                .onTrue(elevatorToTop);
-
-        operatorXbox.b().whileTrue(new ElevatorFollowCommand(elevator, new DoubleSupplier() {
-            @Override
-            public double getAsDouble() {
-                return (operatorXbox.getLeftY() * -0.5 + 0.5)
-                        * Constants.Elevator.PhysicalParameters.elevatorHeightMeters;
-            }
-        }));
-
-        operatorXbox.povUp().debounce(0.02).onTrue(new InstantCommand(() -> {
-            elevator.setPosition(elevator.getGoalPosition() + 0.1);
-        }));
-
-        operatorXbox.povDown().debounce(0.02).onTrue(new InstantCommand(() -> {
-            elevator.setPosition(elevator.getGoalPosition() - 0.1);
-        }));
-    }
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.

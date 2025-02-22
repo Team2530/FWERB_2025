@@ -4,29 +4,20 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.util.GeometryUtil;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
-import com.revrobotics.SparkLimitSwitch;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Unit;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -49,25 +40,15 @@ public final class Constants {
   public static class RobotConstants {
     public static final double robotWidthMeters = Units.inchesToMeters(25.0);
     public static final double robotLengthMeters = Units.inchesToMeters(25.0);
+    
+      // TODO: ############## REPLACE PLACEHOLDERS ##############
+      public static final double TOTAL_MASS_KG = 30; // 107lbs
+      public static final double MOMENT_OF_INERTIA = 3;
   }
 
   public static final class FieldConstants {
     public static final double GRAVITY = 9.81;
     public static final double SPEAKER_HEIGHT = 2.05; // Meters
-
-    public static Translation2d getSpeakerPosition() {
-      Translation2d speakerBlue = new Translation2d(0.022, 5.55);
-      speakerBlue = getAlliance() == Alliance.Blue ? speakerBlue
-          : GeometryUtil.flipFieldPosition(speakerBlue);
-      return speakerBlue;
-    }
-
-    public static Translation2d getShuttlePosition() {
-      Translation2d shuttleBlue = new Translation2d(1.49, 7.12);
-      shuttleBlue = getAlliance() == Alliance.Blue ? shuttleBlue
-          : GeometryUtil.flipFieldPosition(shuttleBlue);
-      return shuttleBlue;
-    }
 
     public static Alliance getAlliance() {
       if (DriverStation.getAlliance().isPresent()) {
@@ -80,14 +61,17 @@ public final class Constants {
 
   public static class SwerveModuleConstants {
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
-    public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d);
+    public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d); // 6.75:1
     // This is for L2 modules with 16T pinions
-    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d) * (16.f / 14.f);
+    public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d);
 
     public static final double DRIVE_ROTATION_TO_METER = DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER;
     public static final double STEER_ROTATION_TO_RADIANS = STEERING_GEAR_RATIO * Math.PI * 2d;
     public static final double DRIVE_METERS_PER_MINUTE = DRIVE_ROTATION_TO_METER / 60d;
     public static final double STEER_RADIANS_PER_MINUTE = STEER_ROTATION_TO_RADIANS / 60d;
+
+    // TODO: ############## REPLACE PLACEHOLDERS ##############
+    public static final double WHEEL_FRICTION_COEFFICIENT = 1;
 
     // Actual drive gains
     // public static final double MODULE_KP = 0.5;
@@ -138,6 +122,9 @@ public final class Constants {
     public static final double MAX_ROBOT_VELOCITY = 5.21;
     public static final double MAX_ROBOT_RAD_VELOCITY = 12.0; // Approx. Measured rads/sec
 
+    // TODO: ############## REPLACE PLACEHOLDERS ##############
+    public static final double MAX_MODULE_CURRENT = 100;
+
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
     public static final double WHEEL_BASE = Units.inchesToMeters(19.75);
     // TODO: Set this for FWERB V2
@@ -173,7 +160,8 @@ public final class Constants {
     public static boolean elevatorOneInverted = true;
     public static boolean elevatorTwoInverted = false;
 
-    public static SparkLimitSwitch.Type bottomLimitMode = SparkLimitSwitch.Type.kNormallyOpen;
+    public static Type bottomLimitMode = Type.kNormallyOpen;
+
 
     public static double motorTurnsPerMeter = 39.44;
 
@@ -211,12 +199,27 @@ public final class Constants {
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5, 0, 0.2);
     public static final PIDConstants ROTATION_PID = new PIDConstants(5, 0, 0.2);
 
-    public static final HolonomicPathFollowerConfig HOLONOMIC_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-        TRANSLATION_PID,
-        ROTATION_PID,
+    public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONTROLLER = new PPHolonomicDriveController(
+      TRANSLATION_PID,
+      ROTATION_PID
+    );
+
+    public static final RobotConfig ROBOT_CONFIG = new RobotConfig(
+      RobotConstants.TOTAL_MASS_KG,
+      RobotConstants.MOMENT_OF_INERTIA,
+      new ModuleConfig(
+        SwerveModuleConstants.WHEEL_DIAMETER/2,
         DriveConstants.MAX_MODULE_VELOCITY,
-        DriveConstants.DRIVE_BASE_RADIUS,
-        new ReplanningConfig());
+        SwerveModuleConstants.WHEEL_FRICTION_COEFFICIENT, // TODO: ############## REPLACE PLACEHOLDERS ##############
+        DCMotor.getKrakenX60(1),
+        DriveConstants.MAX_MODULE_CURRENT, // TODO: ############## REPLACE PLACEHOLDERS ##############
+        1
+      ),
+      new Translation2d(-0.5, 0.5),
+      new Translation2d(0.5, 0.5),
+      new Translation2d(-0.5, -0.5),
+      new Translation2d(0.5, -0.5)
+    );
   }
 
   public static final class PoseConstants {

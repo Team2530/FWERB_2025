@@ -1,12 +1,5 @@
 {
-  "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 0.7626093884666401,
-      "y": 4.373613761472538
-    },
-    "rotation": -59.036243467926454
-  },
+  "version": "2025.0",
   "command": {
     "type": "sequential",
     "data": {
@@ -190,6 +183,7 @@
       ]
     }
   },
+  "resetOdom": true,
   "folder": "Go-to-middle",
   "choreoAuto": false
 }
