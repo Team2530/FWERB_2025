@@ -9,36 +9,6 @@
           "data": {
             "pathName": "bottom auto.1"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "bottom.2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "bottom 3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "bottom.4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "bottom 3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "bottom.5"
-          }
         }
       ]
     }
