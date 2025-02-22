@@ -180,37 +180,24 @@ public class SwerveSubsystem extends SubsystemBase {
         chassisRotY = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/y");
         chassisRotZ = new DoubleLogEntry(DataLogManager.getLog(), "Chassis/rot_speed/z");
     }
-
+    int mod = 0;
     @Override
     public void periodic() {
 
         if ((!isalliancereset && DriverStation.getAlliance().isPresent())) {
-            callmt1lots();
-            //Translation2d pospose = getPose().getTranslation(); 
-
-            //odometry.resetPosition(getRotation2d(), getModulePositions(),
-             //       new Pose2d(pospose, new Rotation2d(FieldConstants.getAlliance() == Alliance.Red ? 0.0 : Math.PI))); //frankly this don't even matter since the LL overrides
-
-
+            RobotContainer.LLContainer.estimateMT1OdometryPrelim(odometry, lastChassisSpeeds, navX, getModulePositions());
+            SmartDashboard.putString("Prelim odometry position", odometry.getEstimatedPosition().toString());
             isalliancereset = true;
         }
 
-        // TODO: Test
-        // WARNING: REMOVE IF USING TAG FOLLOW!!!
-        // updateVisionOdometry();
- 
-        if (DriverStation.isTeleopEnabled()) {
-            RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
-        }
-        else if (DriverStation.isAutonomous()){
-            RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
-        }
-        else {
-            RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
-        }
+                RobotContainer.LLContainer.estimateMT1Odometry(odometry, lastChassisSpeeds, navX);
 
 
-        odometry.update(getRotation2d(), getModulePositions());
+        
+        //odometry.update(getRotation2d(), getModulePositions());
+
+
+
         // if (DriverStation.getAlliance().isPresent()) {
         // switch (DriverStation.getAlliance().get()) {
         // case Red:
@@ -225,7 +212,9 @@ public class SwerveSubsystem extends SubsystemBase {
         // }
         // } else {
         // // If no alliance provided, just go with blue
+
         field.setRobotPose(getPose());
+        
         // }
 
         SmartDashboard.putData("Field", field);
@@ -254,11 +243,6 @@ public class SwerveSubsystem extends SubsystemBase {
         
     }
 
-    public void callmt1lots(){
-        for(int i = 0; i < 50; i++){
-            RobotContainer.LLContainer.estimateMT1OdometryPrelim(odometry, lastChassisSpeeds, navX, getModulePositions());
-        }
-    }
 
     public void zeroHeading() {
         setHeading(0);
@@ -298,6 +282,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getRotation2d() {
         return new Rotation2d(getHeading());
     }
+    
 
     public void stopDrive() {
         frontLeft.stop();
@@ -316,6 +301,20 @@ public class SwerveSubsystem extends SubsystemBase {
         backLeft.setModuleState(states[Constants.DriveConstants.ModuleIndices.REAR_LEFT]);
     }
 
+    /*
+    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+        chassisSpeeds.vxMetersPerSecond *= -1;
+        chassisSpeeds.vyMetersPerSecond *= -1;
+        swerveDrive.setChassisSpeeds(chassisSpeeds);
+    }
+    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+        swerveDrive.setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond,
+          -chassisSpeeds.omegaRadiansPerSecond));
+    }
+    public void setChassisSpeedsAuto(ChassisSpeeds chassisSpeeds) {
+        setChassisSpeeds(new ChassisSpeeds(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond));
+    }
+    */
     public void setChassisSpeedsAUTO(ChassisSpeeds speeds) {
         double tmp = speeds.vxMetersPerSecond;
         speeds.vxMetersPerSecond = speeds.vyMetersPerSecond;
