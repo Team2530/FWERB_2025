@@ -41,7 +41,7 @@ public final class Constants {
     public static final double robotLengthMeters = Units.inchesToMeters(25.0);
     
       // TODO: ############## REPLACE PLACEHOLDERS ##############
-      public static final double TOTAL_MASS_KG = 44; // 97 pounds
+      public static final double TOTAL_MASS_KG = 43.998; // 97 pounds
       public static final double MOMENT_OF_INERTIA = 4.35;
   }
 
