@@ -4,18 +4,17 @@
 
 package frc.robot;
 
-import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -42,8 +41,8 @@ public final class Constants {
     public static final double robotLengthMeters = Units.inchesToMeters(25.0);
     
       // TODO: ############## REPLACE PLACEHOLDERS ##############
-      public static final double TOTAL_MASS_KG = 30; // 107lbs
-      public static final double MOMENT_OF_INERTIA = 3;
+      public static final double TOTAL_MASS_KG = 44; // 97 pounds
+      public static final double MOMENT_OF_INERTIA = 4.35;
   }
 
   public static final class FieldConstants {
@@ -71,7 +70,7 @@ public final class Constants {
     public static final double STEER_RADIANS_PER_MINUTE = STEER_ROTATION_TO_RADIANS / 60d;
 
     // TODO: ############## REPLACE PLACEHOLDERS ##############
-    public static final double WHEEL_FRICTION_COEFFICIENT = 1;
+    public static final double WHEEL_FRICTION_COEFFICIENT = 1.2;
 
     // Actual drive gains
     // public static final double MODULE_KP = 0.5;
@@ -123,7 +122,7 @@ public final class Constants {
     public static final double MAX_ROBOT_RAD_VELOCITY = 12.0; // Approx. Measured rads/sec
 
     // TODO: ############## REPLACE PLACEHOLDERS ##############
-    public static final double MAX_MODULE_CURRENT = 100;
+    public static final double MAX_MODULE_CURRENT = 50;
 
     public static final double TRACK_WIDTH = Units.inchesToMeters(19.75);
     public static final double WHEEL_BASE = Units.inchesToMeters(19.75);

@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import java.util.List;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -48,7 +46,6 @@ import frc.robot.Constants.PathPlannerConstants;
 import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.SwerveModuleConstants;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
 
 public class SwerveSubsystem extends SubsystemBase {
 
@@ -316,14 +313,12 @@ public class SwerveSubsystem extends SubsystemBase {
     
     public void setChassisSpeedsAUTO(ChassisSpeeds speeds) {
         double tmp = speeds.vxMetersPerSecond;
-        speeds.vxMetersPerSecond = -speeds.vxMetersPerSecond;
-        speeds.vyMetersPerSecond = -speeds.vyMetersPerSecond;
-        // speeds.vyMetersPerSecond = tmp;
-
-        // //speeds.vxMetersPerSecond *= 0.3;
-        // //speeds.vyMetersPerSecond *= 0.3;
-        // tmp = speeds.omegaRadiansPerSecond;
-        speeds.omegaRadiansPerSecond *= -1; 
+        speeds.vxMetersPerSecond = speeds.vyMetersPerSecond;
+        speeds.vyMetersPerSecond = tmp;
+        tmp = speeds.omegaRadiansPerSecond;
+        speeds.omegaRadiansPerSecond *= -1;
+        //speeds.vxMetersPerSecond = 0.1;
+        //speeds.vyMetersPerSecond = 0.1;
         SwerveModuleState[] states = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
         setModules(states);
     }
@@ -417,7 +412,7 @@ public class SwerveSubsystem extends SubsystemBase {
         // Create the path using the bezier points created above
         PathPlannerPath path = PathPlannerPath.fromPathPoints(
                 List.of(pathPoints),
-                new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI), // The constraints for this path. If using a
+                new PathConstraints(3.0,3.0, 2 * Math.PI, 4 * Math.PI), // The constraints for this path. If using a
                                                                          // differential drivetrain, the angular
                                                                          // constraints have no effect.
                 new GoalEndState(0.0, Rotation2d.fromDegrees(-90)) // Goal end state. You can set a holonomic rotation
