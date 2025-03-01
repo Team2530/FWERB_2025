@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.subsystems.SwerveSubsystem.RotationStyle;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -30,13 +29,13 @@ import frc.robot.subsystems.SwerveSubsystem.RotationStyle;
  * project.
  */
 public class Robot extends TimedRobot {
-  
+
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
 
   public static SendableChooser<String> autoChooser = new SendableChooser<>();
-  //LEDstripOne m_stripOne = new LEDstripOne(9);
+  // LEDstripOne m_stripOne = new LEDstripOne(9);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -51,8 +50,8 @@ public class Robot extends TimedRobot {
     // Shuffleboard.getTab("SmartDashboard").add(autoChooser);
     SmartDashboard.putData(autoChooser);
 
-            DataLogManager.start();
-        DriverStation.startDataLog(DataLogManager.getLog());
+    DataLogManager.start();
+    DriverStation.startDataLog(DataLogManager.getLog());
 
     m_robotContainer = new RobotContainer();
   }
@@ -76,7 +75,7 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods. This must be called from the
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
-    
+
     CommandScheduler.getInstance().run();
   }
 
@@ -116,8 +115,6 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    m_robotContainer.getSwerveSubsystem().setRotationStyle(RotationStyle.Driver);
-    // m_robotContainer.resetShootake();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -125,7 +122,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void testInit() {
@@ -146,6 +144,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    
+
   }
 }
