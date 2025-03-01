@@ -51,7 +51,7 @@ public class SwerveModule {
     SlewRateLimiter turnratelimiter = new SlewRateLimiter(4.d);
 
     public SwerveModule(int steerCanID, int driveCanID, int absoluteEncoderPort, double absEncoderOffsetRadians,
-            boolean isAbsoluteEncoderReversed, boolean motorReversed) {
+            boolean isAbsoluteEncoderReversed, boolean motorReversed, boolean steerMotorReversed) {
         // driveMotor = new CANSparkMax(driveCanID, MotorType.kBrushless);
         driveMotor = new TalonFX(driveCanID);
         driveConfigurator = driveMotor.getConfigurator();
@@ -66,7 +66,7 @@ public class SwerveModule {
         steerConfig = new SparkMaxConfig();
         steerConfig
                 .idleMode(IdleMode.kBrake)
-                .inverted(false);
+                .inverted(steerMotorReversed);
         steerConfig.encoder
                 .positionConversionFactor(SwerveModuleConstants.STEER_ROTATION_TO_RADIANS)
                 .velocityConversionFactor(SwerveModuleConstants.STEER_RADIANS_PER_MINUTE);

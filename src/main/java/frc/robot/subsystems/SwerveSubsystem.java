@@ -60,22 +60,26 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveModule frontLeft = new SwerveModule(SwerveModuleConstants.FL_STEER_ID, SwerveModuleConstants.FL_DRIVE_ID,
             SwerveModuleConstants.FL_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.FL_OFFSET_RADIANS,
             SwerveModuleConstants.FL_ABSOLUTE_ENCODER_REVERSED,
-            SwerveModuleConstants.FL_MOTOR_REVERSED);
+            SwerveModuleConstants.FL_MOTOR_REVERSED,
+            SwerveModuleConstants.FL_STEERING_MOTOR_REVERSED);
 
     SwerveModule frontRight = new SwerveModule(SwerveModuleConstants.FR_STEER_ID, SwerveModuleConstants.FR_DRIVE_ID,
             SwerveModuleConstants.FR_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.FR_OFFSET_RADIANS,
             SwerveModuleConstants.FR_ABSOLUTE_ENCODER_REVERSED,
-            SwerveModuleConstants.FR_MOTOR_REVERSED);
+            SwerveModuleConstants.FR_MOTOR_REVERSED,
+            SwerveModuleConstants.FR_STEERING_MOTOR_REVERSED);
 
     SwerveModule backRight = new SwerveModule(SwerveModuleConstants.BR_STEER_ID, SwerveModuleConstants.BR_DRIVE_ID,
             SwerveModuleConstants.BR_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.BR_OFFSET_RADIANS,
             SwerveModuleConstants.BR_ABSOLUTE_ENCODER_REVERSED,
-            SwerveModuleConstants.BR_MOTOR_REVERSED);
+            SwerveModuleConstants.BR_MOTOR_REVERSED,
+            SwerveModuleConstants.BR_STEERING_MOTOR_REVERSED);
 
     SwerveModule backLeft = new SwerveModule(SwerveModuleConstants.BL_STEER_ID, SwerveModuleConstants.BL_DRIVE_ID,
             SwerveModuleConstants.BL_ABSOLUTE_ENCODER_PORT, SwerveModuleConstants.BL_OFFSET_RADIANS,
             SwerveModuleConstants.BL_ABSOLUTE_ENCODER_REVERSED,
-            SwerveModuleConstants.BL_MOTOR_REVERSED);
+            SwerveModuleConstants.BL_MOTOR_REVERSED,
+            SwerveModuleConstants.BL_STEERING_MOTOR_REVERSED);
 
     public final AHRS navX = new AHRS(AHRS.NavXComType.kMXP_SPI);
     private double navxSim;
@@ -201,7 +205,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public double getGyroHeading() {
-        return Robot.isSimulation() ? navxSim : Units.degreesToRadians(Math.IEEEremainder(navX.getAngle(), 360));
+        return Robot.isSimulation() ? navxSim : Units.degreesToRadians(Math.IEEEremainder(-navX.getAngle(), 360));
     }
 
     public Rotation2d getGyroRotation2d() {
@@ -221,8 +225,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, DriveConstants.MAX_MODULE_VELOCITY);
         frontLeft.setModuleState(states[0]);
         frontRight.setModuleState(states[1]);
-        backRight.setModuleState(states[2]);
-        backLeft.setModuleState(states[3]);
+        backLeft.setModuleState(states[2]);
+        backRight.setModuleState(states[3]);
     }
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {

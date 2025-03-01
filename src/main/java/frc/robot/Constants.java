@@ -86,33 +86,37 @@ public final class Constants {
         public static final int FL_DRIVE_ID = 4;
         public static final int FL_STEER_ID = 4;
         public static final int FL_ABSOLUTE_ENCODER_PORT = 4;
-        public static final double FL_OFFSET_RADIANS = Units.rotationsToRadians(0.389893) + Math.PI * 0.5 + Math.PI;
-        public static final boolean FL_ABSOLUTE_ENCODER_REVERSED = true;
+        public static final double FL_OFFSET_RADIANS = Units.rotationsToRadians(0.39);
+        public static final boolean FL_ABSOLUTE_ENCODER_REVERSED = false;
         public static final boolean FL_MOTOR_REVERSED = true;
+        public static final boolean FL_STEERING_MOTOR_REVERSED = true;
 
         // --------- Front Right Module --------- \\
         public static final int FR_DRIVE_ID = 1;
         public static final int FR_STEER_ID = 1;
         public static final int FR_ABSOLUTE_ENCODER_PORT = 1;
-        public static final double FR_OFFSET_RADIANS = Units.rotationsToRadians(0.323730) + Math.PI * 0.5 + Math.PI;
-        public static final boolean FR_ABSOLUTE_ENCODER_REVERSED = true;
+        public static final double FR_OFFSET_RADIANS = Units.rotationsToRadians(0.326172);
+        public static final boolean FR_ABSOLUTE_ENCODER_REVERSED = false;
         public static final boolean FR_MOTOR_REVERSED = true;
+        public static final boolean FR_STEERING_MOTOR_REVERSED = true;
 
         // --------- Back Right Module --------- \\
         public static final int BR_DRIVE_ID = 2;
         public static final int BR_STEER_ID = 2;
         public static final int BR_ABSOLUTE_ENCODER_PORT = 2;
-        public static final double BR_OFFSET_RADIANS = Units.rotationsToRadians(-0.360107) + Math.PI * 0.5 + Math.PI;
-        public static final boolean BR_ABSOLUTE_ENCODER_REVERSED = true;
+        public static final double BR_OFFSET_RADIANS = Units.rotationsToRadians(-0.360107);
+        public static final boolean BR_ABSOLUTE_ENCODER_REVERSED = false;
         public static final boolean BR_MOTOR_REVERSED = true;
+        public static final boolean BR_STEERING_MOTOR_REVERSED = true;
 
         // --------- Back Left Module --------- \\
         public static final int BL_DRIVE_ID = 3;
         public static final int BL_STEER_ID = 3;
         public static final int BL_ABSOLUTE_ENCODER_PORT = 3;
-        public static final double BL_OFFSET_RADIANS = Units.rotationsToRadians(0.399902) + Math.PI * 0.5 + Math.PI;
-        public static final boolean BL_ABSOLUTE_ENCODER_REVERSED = true;
+        public static final double BL_OFFSET_RADIANS = Units.rotationsToRadians(0.393);
+        public static final boolean BL_ABSOLUTE_ENCODER_REVERSED = false;
         public static final boolean BL_MOTOR_REVERSED = true;
+        public static final boolean BL_STEERING_MOTOR_REVERSED = true;
 
     }
 
@@ -187,8 +191,8 @@ public final class Constants {
     }
 
     public static final class PathPlannerConstants {
-        public static final PIDConstants TRANSLATION_PID = new PIDConstants(7.5, 0, 0.1);
-        public static final PIDConstants ROTATION_PID = new PIDConstants(5, 0, 0.02);
+        public static final PIDConstants TRANSLATION_PID = new PIDConstants(7.5, 0, 0.02);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(10.0, 0, 0.1);
 
         public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONTROLLER = new PPHolonomicDriveController(
                 TRANSLATION_PID,
@@ -200,8 +204,7 @@ public final class Constants {
                 new ModuleConfig(
                         SwerveModuleConstants.WHEEL_DIAMETER / 2,
                         DriveConstants.MAX_MODULE_VELOCITY,
-                        SwerveModuleConstants.WHEEL_FRICTION_COEFFICIENT, // TODO: ############## REPLACE PLACEHOLDERS
-                                                                          // ##############
+                        SwerveModuleConstants.WHEEL_FRICTION_COEFFICIENT,
                         DCMotor.getKrakenX60(1),
                         DriveConstants.MAX_MODULE_CURRENT,
                         1),
