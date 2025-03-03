@@ -157,10 +157,13 @@ public class SwerveModule {
     }
 
     public void setModuleStateRaw(SwerveModuleState state) {
-        state.optimize(new Rotation2d(getSteerPosition()));
+        Rotation2d currentSteerRotation = new Rotation2d(getSteerPosition());
+
+        state.optimize(currentSteerRotation);
         drive_command = state.speedMetersPerSecond / DriveConstants.MAX_MODULE_VELOCITY;
 
-        driveMotor.set(drive_command);
+        // Add cosine compensation
+        driveMotor.set(drive_command * state.angle.minus(currentSteerRotation).getCos());
 
         steer_command = steerPID.calculate(getSteerPosition(), state.angle.getRadians());
 
