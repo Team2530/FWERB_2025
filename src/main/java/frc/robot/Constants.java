@@ -59,7 +59,7 @@ public final class Constants {
     }
 
     public static class SwerveModuleConstants {
-        public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
+        public static final double WHEEL_DIAMETER = Units.inchesToMeters(3.85);
         public static final double STEERING_GEAR_RATIO = 1.d / (150d / 7d); // 6.75:1
         // This is for L2 modules with 16T pinions
         public static final double DRIVE_GEAR_RATIO = (1.d / 6.75d);
@@ -192,7 +192,7 @@ public final class Constants {
 
     public static final class PathPlannerConstants {
         public static final PIDConstants TRANSLATION_PID = new PIDConstants(7.5, 0, 0.02);
-        public static final PIDConstants ROTATION_PID = new PIDConstants(10.0, 0, 0.1);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(11, 0, 0.02);
 
         public static final PPHolonomicDriveController HOLONOMIC_FOLLOWER_CONTROLLER = new PPHolonomicDriveController(
                 TRANSLATION_PID,
