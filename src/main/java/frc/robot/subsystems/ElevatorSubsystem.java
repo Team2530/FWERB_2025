@@ -25,10 +25,15 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 
-public class ElevatorSubsystem extends ProfiledPIDSubsystem {
+public class ElevatorSubsystem extends SubsystemBase {
+
+    private final ProfiledPIDController controller;
+
+
     // NOTE: Elevator motor one has both the encoder used for positioning, and the
     // limit switch used for zeroing
     private final SparkFlex elevatorMotorOne = new SparkFlex(Constants.Elevator.elevatorOnePort,
@@ -95,17 +100,15 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
     private MechanismLigament2d elevatorMechanism;
 
     public ElevatorSubsystem() {
-        super(
-                new ProfiledPIDController(
+        this.controller = new ProfiledPIDController(
                         Constants.Elevator.PID.kP,
                         Constants.Elevator.PID.kI,
                         Constants.Elevator.PID.kD,
                         new TrapezoidProfile.Constraints(
                                 Constants.Elevator.PID.MAX_VELOCITY,
-                                Constants.Elevator.PID.MAX_ACCELERATION)),
-                0.0);
+                                Constants.Elevator.PID.MAX_ACCELERATION));
 
-        this.getController().setTolerance(Units.inchesToMeters(0.5));
+        this.controller.setTolerance(Units.inchesToMeters(0.5));
 
         elevatorConfigOne
             .idleMode(IdleMode.kBrake)
@@ -133,13 +136,13 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
 
         bottomLimit = elevatorMotorOne.getReverseLimitSwitch();
 
-        this.enable();
+        // TODO: somehow start the pid in elevator
 
         this.elevatorMechanism = rootMechanism.append(new MechanismLigament2d("elevator", 0.0, 90));
     }
 
-    public void setPosition(double positionMeters) {
-        setGoal(MathUtil.clamp(positionMeters, 0.0, Constants.Elevator.PhysicalParameters.elevatorHeightMeters));
+    public void setGoal(double positionMeters) {
+        controller.setGoal(MathUtil.clamp(positionMeters, 0.0, Constants.Elevator.PhysicalParameters.elevatorHeightMeters));
     }
 
     public double getPosition() {
@@ -147,13 +150,12 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
     }
 
     public double getGoalPosition() {
-        return this.getController().getGoal().position;
+        return controller.getGoal().position;
     }
 
     double lastVelocity = 0.0;
     double lastTime = 0.0;
 
-    @Override
     public void useOutput(double output, TrapezoidProfile.State setpoint) {
         double dv = setpoint.velocity - lastVelocity;
         double dt = Timer.getFPGATimestamp() - lastTime;
@@ -189,18 +191,15 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
         }
     }
 
-    @Override
     public double getMeasurement() {
         return Robot.isSimulation() ? simulation.getPositionMeters() : elevatorEncoderOne.getPosition();
     }
 
     @Override
     public void periodic() {
-        // TODO Auto-generated method stub
-
         if ((bottomLimit.isPressed()) && (!isZeroed)) {
             elevatorEncoderOne.setPosition(0.0);
-            setGoal(0.0);
+            controller.setGoal(0.0);
             isZeroed = true;
         }
 
@@ -233,6 +232,10 @@ public class ElevatorSubsystem extends ProfiledPIDSubsystem {
     }
 
     public boolean isInPosition() {
-        return this.getController().atGoal();
+        return controller.atGoal();
+    }
+
+    public ProfiledPIDController getController() {
+        return this.controller;
     }
 }

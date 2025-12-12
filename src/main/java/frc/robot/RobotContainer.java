@@ -153,11 +153,11 @@ public class RobotContainer {
         }));
 
         operatorXbox.povUp().debounce(0.02).onTrue(new InstantCommand(() -> {
-            elevator.setPosition(elevator.getGoalPosition() + 0.1);
+            elevator.setGoal(elevator.getGoalPosition() + 0.1);
         }));
 
         operatorXbox.povDown().debounce(0.02).onTrue(new InstantCommand(() -> {
-            elevator.setPosition(elevator.getGoalPosition() - 0.1);
+            elevator.setGoal(elevator.getGoalPosition() - 0.1);
         }));
     }
 

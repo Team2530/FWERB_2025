@@ -26,7 +26,7 @@ public class ElevatorFollowCommand extends Command {
 
     @Override
     public void initialize() {
-        elevatorSub.enable();
+        // TODO: somehow start the pid in elevator
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ElevatorFollowCommand extends Command {
         double dt = Timer.getFPGATimestamp() - lastTime;
         lastTime = Timer.getFPGATimestamp();
         lastTarget = tgt;
-        elevatorSub.setGoal(new TrapezoidProfile.State(
+        elevatorSub.getController().setGoal(new TrapezoidProfile.State(
                 MathUtil.clamp(limiter.calculate(tgt), 0,
                         Constants.Elevator.PhysicalParameters.elevatorHeightMeters),
                 0.0));
